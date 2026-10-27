@@ -1,0 +1,47 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── Security: never commit credentials ─────────────────────────────
+# Wallet / operator private keys (Klever PEM, raw key material)
+*.pem
+*.key
+*.p12
+*.pfx
+# Local agent/session config
+.claude/
+# Any env files
+.env
+.env.*
+
+# ── Local-only tooling (owner keys, deploy scripts, vendor libs) ─────
+# Kept on the operator machine only — see contracts/tools/README.md
+contracts/tools/
+
+# ── Build artifacts (regenerable) ───────────────────────────────────
+# Rust target dirs (all workspaces)
+target/
+# Compiled contract WASM + generated meta (rebuild: see contracts/DEPLOYMENTS.md)
+contracts/output/
+contracts/wasm/target/

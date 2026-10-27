@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>kDice — Concept B: Crypto SaaS Minimal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0B0C0E;--card:#14161B;--line:#262A33;--text:#F2F4F7;--muted:#9AA1B0;--green:#32C96B;--red:#F0546F;--blue:#5B8CFF;--radius:12px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;font-feature-settings:"tnum"}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 32px 72px}
+  header{display:flex;align-items:center;justify-content:space-between;height:60px;border-bottom:1px solid var(--line)}
+  .logo{font-weight:700;font-size:16px;display:flex;align-items:center;gap:10px}
+  .logo-mark{width:22px;height:22px;border-radius:6px;background:var(--green);display:grid;place-items:center;color:#04140A;font-weight:800;font-size:13px}
+  .logo span{color:var(--muted);font-weight:500}
+  .nav{display:flex;align-items:center;gap:20px;color:var(--muted);font-size:13.5px}
+  .nav a{color:var(--muted);text-decoration:none}
+  .theme{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .theme div{padding:5px 12px;font-size:12.5px;color:var(--muted);cursor:pointer}
+  .theme .on{background:#20242D;color:var(--text)}
+  .btn{background:var(--green);color:#04140A;font-weight:600;font-size:13.5px;border:none;border-radius:8px;padding:9px 18px;cursor:pointer;font-family:inherit}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .row{display:flex;gap:8px}
+  .grid{display:grid;gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  .h{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.2px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+  .kicker{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--green)}
+  .hero{padding:44px 0 36px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px}
+  .hero h1{font-size:32px;font-weight:700;letter-spacing:-.5px}
+  .hero p{color:var(--muted);max-width:520px;margin-top:6px}
+  .bal{text-align:right}
+  .bal .v{font-size:22px;font-weight:600}
+  .bal .l{font-size:12px;color:var(--muted)}
+  .main{display:grid;grid-template-columns:380px 1fr;gap:14px;margin-bottom:14px}
+  .field{margin-bottom:16px}
+  .field label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:7px}
+  .input{width:100%;background:#0E1014;border:1px solid var(--line);border-radius:8px;color:var(--text);font-family:inherit;font-size:15px;padding:11px 12px;display:flex;justify-content:space-between}
+  .input b{font-weight:600;color:var(--green)}
+  input[type=range]{width:100%;accent-color:var(--green);height:4px}
+  .mult-big{display:flex;align-items:baseline;gap:14px;margin-bottom:14px}
+  .mult-big .x{font-size:34px;font-weight:700}
+  .mult-big .t{font-size:12.5px;color:var(--muted)}
+  .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+  .kv:last-of-type{border-bottom:none}
+  .kv .k{color:var(--muted)} .kv .v{font-weight:600}
+  .kv .v.g{color:var(--green)} .kv .v.r{color:var(--red)}
+  .stats{grid-template-columns:repeat(4,1fr);margin-bottom:14px}
+  .stat .l{font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+  .stat .v{font-size:24px;font-weight:600;letter-spacing:-.3px;margin-top:6px}
+  .stat .v.g{color:var(--green)} .stat .v.r{color:var(--red)}
+  .stat .d{font-size:12px;margin-top:6px}
+  .up{color:var(--green)} .dn{color:var(--red)}
+  .spark polyline{fill:none;stroke:var(--green);stroke-width:2}
+  .spark .dim{stroke:#3A4152;stroke-width:2}
+  .tabs{display:inline-flex;background:#0E1014;border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px}
+  .tabs span{padding:4px 12px;border-radius:6px;font-size:12.5px;color:var(--muted);cursor:pointer}
+  .tabs .on{background:#20242D;color:var(--text);font-weight:500}
+  .overall-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px}
+  .bars svg{width:100%;height:170px;display:block}
+  .bars .b{fill:#232A36} .bars .b.g{fill:var(--green);fill-opacity:.85}
+  .axis{font-size:11px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:right;font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;padding:7px 10px;border-bottom:1px solid var(--line)}
+  th:first-child{text-align:left}
+  td{text-align:right;padding:9px 10px;border-bottom:1px solid #1D212A;font-size:13px}
+  td:first-child{text-align:left;font-weight:500}
+  td .addr{color:var(--muted);font-size:11.5px;display:block}
+  .tagpill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11.5px;font-weight:500}
+  .tagpill.g{background:rgba(50,201,107,.12);color:var(--green)} .tagpill.r{background:rgba(240,84,111,.12);color:var(--red)}
+  .foot{margin-top:8px;color:#586070;font-size:12px;display:flex;justify-content:space-between}
+  .donut{display:flex;align-items:center;gap:16px}
+  .donut .lg{font-size:12.5px;color:var(--muted);display:grid;gap:6px}
+  .dotc{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><div class="logo-mark">k</div><b>kDice</b><span>/ dice on Klever</span></div>
+    <div class="nav">
+      <a href="#">Play</a><a href="#">Stats</a><a href="#">Docs</a>
+      <div class="theme"><div class="on">Dark</div><div>Light</div><div>System</div></div>
+      <div class="row"><button class="btn ghost">k5…c4</button><button class="btn">Connect</button></div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <div class="kicker">On-chain dice · Klever L1</div>
+      <h1>Stake. Roll. Settle in KLV.</h1>
+      <p>Every roll is resolved by an on-chain smart contract with verifiable randomness. No house RNG, no trust required.</p>
+    </div>
+    <div class="bal"><div class="l">Your balance</div><div class="v">248.10 KLV</div></div>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <div class="h"><span>New roll</span><span style="font-size:11.5px;color:var(--muted)">Est. fee 0.001 KLV</span></div>
+      <div class="field">
+        <label><span>Stake</span><span><button class="btn ghost" style="padding:2px 10px;font-size:11px">MAX</button></span>
+        <div class="input">12.50 <b>KLV</b></div>
+      </div>
+      <div class="field">
+        <label><span>Multiplier</span><span><b style="color:var(--green)">×10.00</b></span>
+        <input type="range" min="1.01" max="100" value="10">
+      </div>
+      <div class="kv"><span class="k">Win chance</span><span class="v">91.67%</span></div>
+      <div class="kv"><span class="k">Potential win</span><span class="v g">+112.50 KLV</span></div>
+      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button class="btn" style="padding:12px">Roll</button>
+        <button class="btn ghost" style="padding:12px">Auto ×5</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="h"><span>Session</span><span class="tagpill g">✓ last roll won</span></div>
+      <div class="mult-big"><span class="x" style="color:var(--green)">+112.50</span><span class="t">KLV · ×10 multiplier<br>random 91.42 ≤ target 91.67</span></div>
+      <div class="kv"><span class="k">Tx</span><span class="v">0x8f3a…c21e <span class="up">&nbsp;view →</span></span></div>
+      <div class="kv"><span class="k">Contract</span><span class="v">k0.kdice.contract</span></div>
+      <div class="kv"><span class="k">Block></span><span class="v">#18,204,113 · 4s ago</span></div>
+      <div style="margin-top:14px;background:#0E1014;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12.5px;color:var(--muted)">
+        Last rolls:&nbsp; <b class="up">W</b> <b class="up">W</b> <b class="dn">L</b> <b class="up">W</b> <b class="dn">L</b> <b class="up">W</b> — session P/L <b class="up">+86.20 KLV</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid stats">
+    <div class="card stat"><div class="l"><span>Total staked</span><span>30d</span></div><div class="v">482.60 KLV</div><div class="d dn">↓ 8.2% vs prev.</div><div style="display:flex;justify-content:flex-end"><svg class="spark" width="110" height="30" viewBox="0 0 110 30" preserveAspectRatio="none"><polyline points="0,8 15,12 30,10 45,18 60,16 75,22 90,20 110,26"/></svg></div></div>
+    <div class="card stat"><div class="l"><span>Games played</span><span>30d</span></div><div class="v">318</div><div class="d up">↑ 42 this week</div></div>
+    <div class="card stat"><div class="l"><span>Win rate</span><span>30d</span></div><div class="v">61.9%</div><div class="d up">197W / 121L</div></div>
+    <div class="card stat"><div class="l"><span>Net P/L</span><span>30d</span></div><div class="v g">+126.40</div><div class="d up">KLV all time</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="h"><span>Overall dashboard <span class="tagpill g" style="margin-left:8px">project-wide</span></span>
+      <div class="tabs"><span class="on">7d</span><span>30d</span><span>12m</span><span>All</span></div>
+    </div>
+    <div class="overall-grid">
+      <div class="bars">
+        <svg viewBox="0 0 600 170" preserveAspectRatio="none">
+          <rect class="b" x="10" y="70" width="34" height="90" rx="3"/><rect class="b g" x="10" y="40" width="34" height="30" rx="3" fill-opacity=".9"/>
+          <rect class="b" x="95" y="85" width="34" height="75" rx="3"/><rect class="b g" x="95" y="55" width="34" height="30" rx="3" fill-opacity=".9"/>
+          <rect class="b" x="180" y="60" width="34" height="100" rx="3"/><rect class="b g" x="180" y="25" width="34" height="35" rx="3" fill-opacity=".9"/>
+          <rect class="b" x="265" y="90" width="34" height="70" rx="3"/><rect class="b g" x="265" y="62" width="34" height="28" rx="3" fill-opacity=".9"/>
+          <rect class="b" x="350" y="50" width="34" height="110" rx="3"/><rect class="b g" x="350" y="18" width="34" height="32" rx="3" fill-opacity=".9"/>
+          <rect class="b" x="435" y="75" width="34" height="85" rx="3"/><rect class="b g" x="435" y="45" width="34" height="30" rx="3" fill-opacity=".9"/>
+          <rect class="b" x="520" y="35" width="34" height="125" rx="3"/><rect class="b g" x="520" y="8" width="34" height="27" rx="3" fill-opacity=".9"/>
+        </svg>
+        <div class="axis" style="display:flex;justify-content:space-between;margin-top:6px"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <div class="axis" style="display:flex;gap:18px;margin-top:10px"><span><span class="dotc" style="background:#232A36"></span>Games (loss)</span><span><span class="dotc" style="background:var(--green)"></span>Games (win)</span></div>
+      </div>
+      <div>
+        <table>
+          <tr><th>Player</th><th>Games</th><th>W/L</th><th>Staked</th></tr>
+          <tr><td>neonwolf<span class="addr">k5…8f2d</span></td><td>214</td><td><span class="tagpill g">71%</span></td><td>890.4</td></tr>
+          <tr><td>k5_rider</td><td>162</td><td><span class="tagpill r">48%</span></td><td>511.0</td></tr>
+          <tr><td>dicequeen</td><td>133</td><td><span class="tagpill g">66%</span></td><td>342.7</td></tr>
+          <tr><td>0xMika</td><td>98</td><td><span class="tagpill g">59%</span></td><td>201.3</td></tr>
+          <tr><td>lucky77</td><td>77</td><td><span class="tagpill r">41%</span></td><td>129.9</td></tr>
+        </table>
+        <div style="margin-top:14px;display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>Active players (7d): <b style="color:var(--text)">14</b></span><span>Avg games/player: <b style="color:var(--text)">24.6</b></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot"><span>Concept B — “Crypto SaaS Minimal” · Inter, tabular figures, 1px borders</span><span>dark default · light mode is a 1:1 inversion</span></div>
+</div>
+</body>
+</html>

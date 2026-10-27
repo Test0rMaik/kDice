@@ -1,0 +1,853 @@
+/* kDice — "Neon Vegas" (Concept A) theme
+   Token palette lifted 1:1 from planning/design-a-neon-vegas.html */
+
+:root {
+  --bg: #05070D;
+  --felt: #0C1329;
+  --panel: rgba(16, 22, 40, 0.72);
+  --panel-2: rgba(24, 33, 62, 0.85);
+  --panel-border: rgba(0, 240, 255, 0.22);
+  --line: rgba(255, 255, 255, 0.12);
+  --neon: #00F0FF;
+  --neon-dim: rgba(0, 240, 255, 0.35);
+  --magenta: #A855F7;
+  --gold: #F5B301;
+  --gold-soft: #FFD75E;
+  --green: #2EE6A8;
+  --red: #FF5C7A;
+  --text: #E8ECF8;
+  --muted: #8A93B2;
+  /* Surface accents (Phase 6): theme-swappable so the light palette can
+     re-tint die/table glows without touching component rules. */
+  --bg-deep: #060B17;
+  --table-wash: rgba(0, 240, 255, 0.10);
+  --die-from: #101A33;
+  --die-to: #0A1020;
+  --die-border: rgba(0, 240, 255, 0.35);
+  --die-glow: rgba(0, 240, 255, 0.28);
+  --die-glow-strong: rgba(0, 240, 255, 0.44);
+  --die-inset: rgba(0, 240, 255, 0.10);
+  --die-inset-strong: rgba(0, 240, 255, 0.16);
+  --die-flash: rgba(0, 240, 255, 0.65);
+  --die-flash-inset: rgba(0, 240, 255, 0.25);
+  --die-shadow: rgba(0, 0, 0, 0.5);
+  --font: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+  font-family: var(--font);
+  color-scheme: dark;
+}
+
+/* ── LIGHT THEME (Phase 6) ─────────────────────────────────────────
+   Same neon identity, tuned for a light canvas: deeper cyan/violet accents
+   for contrast, white-glass panels, soft shadows. Set via
+   <html data-theme="light"> (theme-init.js pre-paint + header toggle). */
+:root[data-theme='light'] {
+  --bg: #EEF2FA;
+  --felt: #E4EBF7;
+  --panel: rgba(255, 255, 255, 0.82);
+  --panel-2: rgba(240, 245, 252, 0.96);
+  --panel-border: rgba(8, 145, 178, 0.35);
+  --line: rgba(15, 23, 42, 0.16);
+  --neon: #0891B2;
+  --neon-dim: rgba(8, 145, 178, 0.40);
+  --magenta: #7C3AED;
+  --gold: #B45309;
+  --gold-soft: #92600A;
+  --green: #059669;
+  --red: #E11D48;
+  --text: #17233B;
+  --muted: #5B6784;
+  --bg-deep: #D9E2F0;
+  --table-wash: rgba(8, 145, 178, 0.08);
+  --die-from: #F5F9FF;
+  --die-to: #E2EAF8;
+  --die-border: rgba(8, 145, 178, 0.45);
+  --die-glow: rgba(8, 145, 178, 0.22);
+  --die-glow-strong: rgba(8, 145, 178, 0.32);
+  --die-inset: rgba(8, 145, 178, 0.10);
+  --die-inset-strong: rgba(8, 145, 178, 0.16);
+  --die-flash: rgba(8, 145, 178, 0.45);
+  --die-flash-inset: rgba(8, 145, 178, 0.20);
+  --die-shadow: rgba(30, 41, 59, 0.18);
+  color-scheme: light;
+}
+/* Aurora wash — softer, theme-matched tones on the light canvas */
+:root[data-theme='light'] body::before {
+  background:
+    radial-gradient(600px 400px at 12% -5%, rgba(8, 145, 178, 0.10), transparent 60%),
+    radial-gradient(700px 500px at 90% 10%, rgba(124, 58, 237, 0.09), transparent 60%),
+    radial-gradient(500px 500px at 50% 110%, rgba(180, 83, 9, 0.06), transparent 60%);
+}
+/* Accent-on-accent text must invert: dark text fails on light's deeper cyan */
+:root[data-theme='light'] .side--active { color: #fff; box-shadow: 0 0 16px rgba(8, 145, 178, 0.35); }
+:root[data-theme='light'] .side--active small { color: rgba(255, 255, 255, 0.85); }
+:root[data-theme='light'] .roll-btn { color: #fff; }
+:root[data-theme='light'] .tag { background: rgba(8, 145, 178, 0.08); }
+:root[data-theme='light'] .tag--gold { border-color: rgba(180, 83, 9, 0.40); background: rgba(180, 83, 9, 0.07); }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* Phase 4.11: the concept's static neon wash becomes a slow "aurora" drift.
+   Fixed pseudo-layer animated with transform only (compositor-friendly). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(600px 400px at 12% -5%, rgba(0, 240, 255, 0.14), transparent 60%),
+    radial-gradient(700px 500px at 90% 10%, rgba(168, 85, 247, 0.16), transparent 60%),
+    radial-gradient(500px 500px at 50% 110%, rgba(245, 179, 1, 0.08), transparent 60%);
+  animation: aurora 26s ease-in-out infinite alternate;
+}
+
+@keyframes aurora {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-1.5%, 1%, 0) scale(1.05); }
+  100% { transform: translate3d(1.5%, -1%, 0) scale(1.07); }
+}
+
+.app { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+
+/* ── Top bar ─────────────────────────────────────────── */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 22px; border: 1px solid var(--panel-border);
+  border-radius: 20px; background: var(--panel); backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.brand { display: flex; flex-direction: row; align-items: center; gap: 12px; }
+/* Concept A `.logo-die`: cyan→magenta gradient tile with a neon halo */
+.logo-die {
+  flex: 0 0 auto;
+  width: 34px; height: 34px; border-radius: 9px;
+  display: grid; place-items: center;
+  font-size: 18px;
+  background: linear-gradient(135deg, var(--neon), var(--magenta));
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.55);
+}
+.brand__name { font-size: 26px; font-weight: 800; letter-spacing: 2px; }
+/* Concept A logo mark: gradient "k" (cyan → magenta) matching .logo b in the spec */
+.brand__k {
+  background: linear-gradient(90deg, var(--neon), var(--magenta));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
+}
+.brand__tag { font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: var(--muted); }
+
+.balance { text-align: right; }
+.balance__label { display: block; font-size: 10px; letter-spacing: 3px; color: var(--gold); }
+.balance__value {
+  font-family: var(--mono);
+  font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums;
+  color: var(--gold); text-shadow: 0 0 16px rgba(245, 179, 1, 0.45);
+}
+
+/* ── Layout ──────────────────────────────────────────── */
+.layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; margin-top: 20px; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+.table {
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  padding: 36px 24px; border-radius: 20px; border: 1px solid var(--line);
+  background:
+    radial-gradient(700px 260px at 50% 0%, var(--table-wash), transparent 70%),
+    linear-gradient(180deg, var(--felt), var(--bg-deep));
+}
+
+/* ── Dice tray & d100 die ───────────────────────────────── */
+.tray { position: relative; display: flex; justify-content: center; perspective: 700px; }
+.tray--rolling { filter: saturate(1.15); }
+
+/* NOTE: Dice.tsx renders a large numeral inside .die (Concept A: single d100),
+   so the pip-grid layout is gone. The die is a rounded neon tile with the
+   face value centered. */
+/* Concept A: die is a dark navy tile with a cyan neon rim and inner glow (spec .die) */
+.die {
+  width: 130px; height: 130px; padding: 14px; border-radius: 22px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+  background: linear-gradient(145deg, var(--die-from), var(--die-to));
+  border: 1px solid var(--die-border);
+  box-shadow: 0 0 40px var(--die-glow), 0 12px 30px var(--die-shadow), inset 0 0 30px var(--die-inset);
+  user-select: none;
+}
+.die__numeral {
+  font-family: var(--mono);
+  font-size: 64px; font-weight: 800; line-height: 1;
+  color: #F4F7FF; font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  text-shadow: 0 0 18px rgba(0, 240, 255, 0.8), 0 0 40px rgba(0, 240, 255, 0.4);
+}
+.die__caption {
+  font-size: 11px; font-weight: 700; letter-spacing: 4px; color: var(--muted);
+  text-transform: uppercase;
+}
+.die--rolling { animation: die-shake 0.42s ease-in-out infinite; }
+.die--rolling .die__numeral { filter: blur(3px); opacity: 0.65; }
+
+@keyframes die-shake {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(7deg) translateY(-6px); }
+  50%  { transform: rotate(-9deg) translateY(3px); }
+  75%  { transform: rotate(5deg) translateY(-4px); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ── Result banner ───────────────────────────────────── */
+.result-banner {
+  padding: 10px 26px; border-radius: 999px; font-weight: 700; letter-spacing: 1px;
+  border: 1px solid var(--line); background: var(--panel);
+  animation: pop-in 0.35s cubic-bezier(0.2, 1.4, 0.5, 1);
+}
+/* Concept A win chip = green (.result-chip in spec); payout figure inside is gold */
+.result--win  { color: var(--green); border-color: rgba(46, 230, 168, 0.5); background: rgba(46, 230, 168, 0.12); box-shadow: 0 0 24px rgba(46, 230, 168, 0.25); }
+.result--loss { color: var(--red);  border-color: rgba(255, 92, 122, 0.5); background: rgba(255, 92, 122, 0.08); }
+.result--push { color: var(--gold); border-color: rgba(245, 197, 66, 0.6); }
+
+/* ── Controls ────────────────────────────────────────── */
+.controls { display: flex; flex-direction: column; align-items: center; gap: 18px; width: 100%; max-width: 460px; }
+.chips { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+.chip {
+  min-width: 62px; padding: 10px 14px; border-radius: 999px; cursor: pointer;
+  font-weight: 700; font-size: 14px; color: var(--text);
+  background: var(--panel-2); border: 1px solid var(--line);
+  transition: transform 0.1s, box-shadow 0.15s;
+}
+.chip:hover:not(:disabled) { transform: translateY(-2px); }
+/* Concept A active control = solid cyan with neon halo (.mult.on in spec) */
+.chip--active {
+  color: #05070D; background: var(--neon); border-color: var(--neon);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.55);
+}
+.chip:disabled { opacity: 0.45; cursor: default; }
+.chip--max { border-style: dashed; }
+
+/* Concept A CTA: flat cyan→magenta gradient with dual neon halo (spec .roll-btn) */
+.roll-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: 100%; padding: 16px; border-radius: 14px; cursor: pointer;
+  font-size: 24px; font-weight: 800; letter-spacing: 6px; color: #05070D;
+  background: linear-gradient(90deg, var(--neon), var(--magenta));
+  border: none;
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.35), 0 0 30px rgba(168, 85, 247, 0.25);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.roll-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.roll-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.25), 0 0 16px rgba(168, 85, 247, 0.18);
+}
+.roll-btn:disabled { filter: grayscale(0.7) brightness(0.6); cursor: not-allowed; box-shadow: none; }
+.roll-btn__bet { font-size: 14px; font-weight: 600; letter-spacing: 2px; color: rgba(5, 7, 13, 0.7); }
+
+/* ── Broke state ─────────────────────────────────────── */
+.broke {
+  text-align: center; padding: 22px; border-radius: 16px; width: 100%; max-width: 460px;
+  border: 1px solid rgba(255, 93, 122, 0.5); background: rgba(255, 93, 122, 0.08);
+}
+.broke p { margin: 0 0 14px; color: var(--red); font-weight: 600; }
+.broke button {
+  padding: 10px 22px; border-radius: 999px; cursor: pointer; font-weight: 700;
+  color: var(--gold); background: transparent; border: 1px solid var(--gold);
+}
+.broke button:hover { background: rgba(245, 179, 1, 0.12); }
+
+/* ── Side panels ─────────────────────────────────────── */
+.side { display: flex; flex-direction: column; gap: 16px; }
+/* Concept A glass panel: translucent navy + cyan rim + backdrop blur (spec .panel) */
+.panel {
+  padding: 20px; border-radius: 20px; border: 1px solid var(--panel-border);
+  background: var(--panel); backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.panel__title {
+  margin: 0 0 12px; font-size: 13px; text-transform: uppercase;
+  letter-spacing: 3px; color: var(--neon);
+}
+
+.payouts { list-style: none; margin: 0; padding: 0; }
+.payouts__row {
+  display: flex; justify-content: space-between; padding: 7px 2px;
+  font-size: 14px; border-bottom: 1px dashed var(--line);
+}
+.payouts__row:last-child { border-bottom: none; }
+.payouts__mult { font-family: var(--mono); color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ── v2 bet controls (Phase 4.10): side toggle + 1–99 slider ───────── */
+.bet-controls { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.sides { display: flex; gap: 10px; }
+.side {
+  flex: 1; padding: 10px 14px; border-radius: 12px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-weight: 800; font-size: 16px; letter-spacing: 2px; color: var(--text);
+  background: var(--panel-2); border: 1px solid var(--line);
+  transition: transform 0.1s, box-shadow 0.15s;
+}
+.side small { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--muted); }
+.side:hover:not(:disabled) { transform: translateY(-2px); }
+.side:disabled { opacity: 0.45; cursor: default; }
+/* Active side mirrors the neon .multiplier--active language (Concept A) */
+.side--active {
+  color: #05070D; background: var(--neon); border-color: var(--neon);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.55);
+}
+.side--active small { color: rgba(5, 7, 13, 0.75); }
+
+.target-row { display: flex; align-items: center; gap: 12px; }
+.target-slider {
+  flex: 1; appearance: none; -webkit-appearance: none; height: 6px; border-radius: 3px;
+  background: linear-gradient(90deg, var(--magenta), var(--neon)); outline: none; cursor: pointer;
+}
+.target-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--neon); border: 3px solid #05070D;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.8); cursor: grab;
+}
+.target-slider:disabled { opacity: 0.5; cursor: default; }
+.target-readout { display: flex; flex-direction: column; align-items: flex-end; min-width: 92px; }
+.target-num {
+  font-family: var(--mono); font-size: 24px; font-weight: 800; color: var(--neon);
+  font-variant-numeric: tabular-nums;
+}
+.target-sub { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--muted); }
+
+/* ── Stake input ─────────────────────────────────────────── */
+/* Phase 4.11: Concept A `.stake` — gold rim, gold mono value */
+.stake-input {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: rgba(245, 179, 1, 0.06);
+  border: 1px solid rgba(245, 179, 1, 0.4);
+  border-radius: 12px;
+  padding: 12px 16px;
+  width: 100%;
+}
+.stake-input span {
+  font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted);
+  text-transform: uppercase;
+}
+.stake-input input {
+  width: 110px; padding: 6px 10px; border-radius: 8px;
+  border: 1px solid rgba(245, 179, 1, 0.35);
+  background: rgba(5, 8, 16, 0.5);
+  color: var(--gold); font-family: var(--mono); font-size: 17px; font-weight: 700;
+  font-variant-numeric: tabular-nums; text-align: right;
+}
+.stake-input input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px rgba(245, 179, 1, 0.18); }
+
+/* ── Table hint ──────────────────────────────────────────── */
+.table__hint {
+  font-size: 14px; color: var(--muted); text-align: center; max-width: 420px;
+  line-height: 1.5;
+}
+.table__hint b { color: var(--neon); }
+
+/* ── Result banner net colors ────────────────────────────── */
+/* Concept A: payout figures inside the win chip are gold (spec .result-chip b) */
+.result__net-pos { font-family: var(--mono); color: var(--gold); text-shadow: 0 0 8px rgba(245, 179, 1, 0.4); }
+.result__net-neg { color: var(--red); }
+
+/* ── Panel foot ──────────────────────────────────────────── */
+.panel__foot {
+  margin: 12px 0 0; font-size: 12px; color: var(--muted); line-height: 1.5;
+}
+
+/* ── Wallet button ───────────────────────────────────────── */
+.wallet {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 14px; border-radius: 999px; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--text);
+  background: transparent; border: 1px solid var(--line);
+  transition: background 0.15s;
+}
+.wallet:hover { background: rgba(255, 255, 255, 0.06); }
+.wallet--on { color: var(--neon); border-color: var(--neon); }
+.wallet__dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--muted);
+}
+.wallet--on .wallet__dot { background: var(--neon); box-shadow: 0 0 6px var(--neon-dim); }
+
+/* ── Theme toggle ────────────────────────────────────────── */
+.theme-toggle {
+  width: 38px; height: 38px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--text);
+  background: transparent; border: 1px solid var(--line);
+  transition: background 0.15s;
+}
+.theme-toggle:hover { background: rgba(255, 255, 255, 0.06); }
+
+/* ── Overall Dashboard (Phase 3) ───────────────────────── */
+.dashboard { margin-top: 20px; }
+.dash {
+  display: flex; flex-direction: column; gap: 18px;
+  padding: 22px; border-radius: 20px; border: 1px solid var(--panel-border);
+  background: var(--panel); backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.dash__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.dash__title {
+  margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text);
+}
+
+/* Range tabs: same pill family as .multiplier, smaller */
+.range-tabs { display: flex; gap: 6px; }
+.range-tabs__btn {
+  padding: 6px 14px; border-radius: 999px; cursor: pointer;
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  background: transparent; border: 1px solid var(--line);
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.range-tabs__btn:hover { color: var(--text); }
+.range-tabs__btn--active {
+  color: #05070D; background: var(--neon); border-color: var(--neon);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+}
+
+/* Stat cards */
+.dash__cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+}
+.card {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 16px; border-radius: 14px;
+  background: var(--panel-2); border: 1px solid var(--line);
+}
+.card__label {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+}
+.card__value {
+  font-family: var(--mono); font-size: 24px; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: var(--gold);
+  text-shadow: 0 0 12px rgba(245, 179, 1, 0.35);
+}
+.card__muted { font-size: 12px; color: var(--muted); }
+.card__delta { font-size: 12px; font-weight: 600; }
+.card__delta--up { color: var(--green); }
+.card__delta--down { color: var(--red); }
+
+/* Activity chart */
+.dash__chart { display: flex; flex-direction: column; gap: 6px; }
+.dash__chart-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+}
+.dash__axis {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--muted); padding: 0 2px;
+}
+.dash__empty { margin: 0; font-size: 13px; color: var(--muted); }
+.dash__empty b { color: var(--neon); }
+
+/* TrendChart SVG — Concept A neon glow + Phase 4.11 draw-in (see keyframes) */
+.trend__area { fill: rgba(0, 240, 255, 0.14); animation: trend-fade 0.9s ease-out; }
+.trend__line {
+  fill: none; stroke: var(--neon);
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.9));
+  stroke-dasharray: 1; /* pathLength=1 in the SVG keeps this resolution-free */
+  animation: trend-draw 0.9s ease-out;
+}
+
+/* Top players table */
+.dash__players { display: flex; flex-direction: column; gap: 10px; }
+.dash__players-title {
+  margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+}
+.dash__table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dash__table th, .dash__table td { padding: 8px 10px; text-align: left; }
+.dash__table th {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.dash__table tbody tr { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.dash__table tbody tr:last-child { border-bottom: none; }
+.dash__num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.dash__addr { font-family: var(--mono); color: var(--neon); }
+
+/* ── Provably-fair on-chain panel (Phase 4.5) ─────────────────────────── */
+.fair { margin-top: 4px; }
+.fair__config {
+  display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end;
+  padding-bottom: 14px; border-bottom: 1px solid var(--line);
+}
+.fair__stats { font-family: var(--mono); font-size: 12px; color: var(--neon); }
+.fair__field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; }
+.fair__field span {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+}
+.fair__field input {
+  background: rgba(5, 8, 16, 0.6); border: 1px solid var(--line);
+  border-radius: 10px; padding: 9px 12px; color: var(--text);
+  font-family: var(--mono); font-size: 12px; outline: none; width: 100%;
+  box-sizing: border-box;
+}
+.fair__field input:focus { border-color: var(--neon-dim); box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.12); }
+.fair__field--game { flex: 0 1 140px; }
+.fair__lookup { display: flex; gap: 12px; align-items: flex-end; padding: 14px 0; }
+.fair__btn {
+  background: linear-gradient(90deg, var(--neon), var(--magenta));
+  border: none; border-radius: 12px; padding: 11px 18px;
+  color: #05070D; font-family: var(--font); font-size: 13px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.fair__btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.1); }
+.fair__btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.fair__error {
+  margin-top: 10px; padding: 10px 14px; border-radius: 10px;
+  background: rgba(255, 92, 122, 0.1); border: 1px solid rgba(255, 92, 122, 0.4);
+  color: var(--red); font-size: 13px;
+}
+.fair__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; }
+@media (max-width: 760px) { .fair__grid { grid-template-columns: 1fr; } }
+.fair__card {
+  background: var(--panel-2); border: 1px solid var(--panel-border);
+  border-radius: 14px; padding: 14px 16px;
+}
+.fair__card-title {
+  margin: 0 0 10px; font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--neon);
+}
+.fair__row {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px;
+}
+.fair__row:last-of-type { border-bottom: none; }
+.fair__row-label { color: var(--muted); flex: 0 0 auto; }
+.fair__row-value {
+  font-family: var(--mono); font-variant-numeric: tabular-nums;
+  text-align: right; word-break: break-all;
+}
+.fair__row--ok .fair__row-value { color: var(--green); }
+.fair__row--bad .fair__row-value { color: var(--red); }
+.fair__badge {
+  display: inline-block; margin-top: 10px; padding: 7px 12px;
+  border-radius: 999px; font-size: 12px; font-weight: 600;
+}
+.fair__badge--ok { background: rgba(46, 230, 168, 0.12); border: 1px solid rgba(46, 230, 168, 0.45); color: var(--green); }
+.fair__badge--bad { background: rgba(255, 92, 122, 0.12); border: 1px solid rgba(255, 92, 122, 0.5); color: var(--red); }
+.fair__empty { color: var(--muted); font-size: 13px; }
+.fair__seeds { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.fair__seed-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.fair__seed-result { margin-top: 12px; background: var(--panel-2); border: 1px solid var(--panel-border); border-radius: 14px; padding: 12px 16px; }
+.fair__seeds { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.fair__seed-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.fair__seed-result { margin-top: 12px; background: var(--panel-2); border: 1px solid var(--panel-border); border-radius: 14px; padding: 12px 16px; }
+
+/* ── Phase 4.7 — wallet header + on-chain play ───────────── */
+.wallet__balance {
+  margin-left: 8px; font-size: 11px; font-family: var(--mono);
+  color: var(--gold); letter-spacing: 0;
+}
+.wallet:disabled { opacity: 0.7; cursor: wait; }
+
+.onchain__hint { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+.onchain__hint b { color: var(--neon); }
+.onchain__controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.onchain__mults { display: flex; gap: 8px; flex-wrap: wrap; }
+.onchain__install, .onchain__connect { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.onchain__install p { margin: 0; color: var(--muted); font-size: 13px; }
+.onchain__status { margin: 12px 0 0; color: var(--gold); font-size: 13px; }
+.onchain__tx {
+  display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px;
+  font-size: 12px; font-family: var(--mono); color: var(--muted);
+}
+.onchain__tx a { color: var(--neon); text-decoration: none; }
+.onchain__tx a:hover { text-decoration: underline; }
+.onchain__gid { color: var(--gold); font-weight: 700; }
+.onchain__result {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-top: 14px; padding: 12px 16px; border-radius: 14px;
+  background: var(--panel-2); border: 1px solid var(--panel-border);
+  font-size: 14px;
+}
+.onchain__result--win { border-color: rgba(46, 230, 168, 0.6); box-shadow: 0 0 24px rgba(46, 230, 168, 0.15); }
+.onchain__result--lose { border-color: rgba(255, 92, 122, 0.5); }
+.onchain__result-big { font-size: 22px; font-weight: 800; letter-spacing: 3px; }
+.onchain__result--win .onchain__result-big { color: var(--green); }
+.onchain__result--lose .onchain__result-big { color: var(--red); }
+
+/* My games table (ProvablyFair) */
+.fair__mygames { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.fair__mytable { width: 100%; border-collapse: collapse; font-size: 12px; }
+.fair__mytable th {
+  text-align: left; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); padding: 4px 8px; border-bottom: 1px solid var(--line);
+}
+.fair__mytable td { padding: 6px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-family: var(--mono); }
+.fair__mytable tr:last-child td { border-bottom: none; }
+.fair__btn--sm { margin: 0; padding: 4px 10px; font-size: 11px; }
+
+/* ── Phase 4.8: on-chain hero ─────────────────────────────────── */
+.hero { margin-top: 20px; }
+
+/* Live stage line under the die (commit/confirm/settle progress). */
+.onchain__stage {
+  font-family: var(--mono); font-size: 13px; color: var(--gold);
+  letter-spacing: 0.5px; text-align: center;
+}
+
+/* ROLL / SETTLE / ROLL AGAIN action row. */
+.onchain__actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+/* Practice history panel: title + compact CREDITS chip on one row. */
+.panel__title--row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.panel__credits { display: inline-flex; flex-direction: column; align-items: flex-end; }
+.balance__value--sm { font-size: 18px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Phase 4.11 — "Neon Vegas" alignment + motion layer
+   Concept tokens/layout from planning/design-a-neon-vegas.html;
+   the @keyframes below are NEW (the concept page is static).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Header: gold Connect CTA (concept `.connect`) ─────────── */
+.wallet--cta {
+  background: linear-gradient(135deg, var(--gold), #FF9D00);
+  border: none;
+  color: #1A1204;
+  font-weight: 700;
+  box-shadow: 0 0 22px rgba(245, 179, 1, 0.4);
+}
+.wallet--cta:hover { background: linear-gradient(135deg, var(--gold), #FF9D00); filter: brightness(1.07); }
+
+/* ── Hero band (concept `.hero`) ───────────────────────────── */
+.hero-intro {
+  display: grid; grid-template-columns: 1.15fr .85fr; gap: 40px; align-items: center;
+  margin-top: 34px;
+}
+.hero-intro h1 {
+  margin: 0;
+  font-size: clamp(38px, 6vw, 56px);
+  line-height: 1.04; font-weight: 700; letter-spacing: -1px;
+}
+.hero-intro h1 span {
+  background: linear-gradient(90deg, var(--neon) 10%, var(--magenta) 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero-intro p { margin-top: 16px; color: var(--muted); font-size: 17px; max-width: 460px; }
+.hero-tags { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+.tag {
+  padding: 7px 14px; border-radius: 999px; font-size: 12.5px;
+  border: 1px solid var(--panel-border); background: rgba(0, 240, 255, 0.06); color: var(--neon);
+}
+.tag--gold { border-color: rgba(245, 179, 1, 0.35); background: rgba(245, 179, 1, 0.07); color: var(--gold-soft); }
+
+/* Decorative dice stage (concept `.dice-stage`) — ornamental only,
+   hidden on small screens to keep the die table the mobile hero. */
+.dice-stage { display: flex; justify-content: center; gap: 26px; padding: 10px 0; }
+.deco-die {
+  width: 110px; height: 110px; border-radius: 22px; position: relative;
+  background: linear-gradient(145deg, var(--die-from), var(--die-to));
+  border: 1px solid var(--die-border);
+  box-shadow: 0 0 40px var(--die-glow), inset 0 0 30px var(--die-inset);
+  animation: deco-float 5s ease-in-out infinite;
+}
+.deco-die--m {
+  border-color: rgba(168, 85, 247, 0.45);
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.30), inset 0 0 30px rgba(168, 85, 247, 0.12);
+  animation-delay: 1.2s;
+}
+.deco-dot {
+  position: absolute; width: 18px; height: 18px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, var(--neon) 70%);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.9);
+}
+.deco-die--m .deco-dot {
+  background: radial-gradient(circle at 35% 30%, #fff, var(--magenta) 70%);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.9);
+}
+@keyframes deco-float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-8px) rotate(2deg); }
+}
+@media (max-width: 860px) {
+  .hero-intro { grid-template-columns: 1fr; gap: 8px; margin-top: 24px; }
+  .dice-stage { display: none; }
+}
+
+/* ── "PLAY" section title (concept `.section-title`) ───────── */
+.play-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; width: 100%; }
+.play-title h2 {
+  margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--neon);
+}
+.play-title small { letter-spacing: 0; text-transform: none; color: var(--muted); font-weight: 400; font-size: 12px; }
+
+/* ── Game grid (concept `.game`: 380px controls | stage) ───── */
+/* Mobile-first: single column with the die stage FIRST (order 1) so the
+   die stays the hero; the control rail drops below. ≥1000px: true 2-col. */
+.game { width: 100%; display: flex; flex-direction: column; gap: 22px; }
+.game__left  { order: 2; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.game__right { order: 1; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+@media (min-width: 1000px) {
+  .game { display: grid; grid-template-columns: 380px 1fr; gap: 28px; align-items: start; }
+  .game__left  { order: 0; align-items: stretch; }
+  .game__right { order: 0; }
+}
+
+/* "Potential payout +X KLV" under the ROLL (concept `.payout`) */
+.payout-line { text-align: center; font-size: 13.5px; color: var(--muted); }
+.payout-line b { font-family: var(--mono); color: var(--gold); font-size: 16px; }
+.payout-line small { display: block; margin-top: 2px; font-size: 11.5px; opacity: 0.85; }
+
+/* ── Pills + gold cell (concept `.pill` / `.gold-cell`) ────── */
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.pill--w { background: rgba(46, 230, 168, 0.12); color: var(--green); }
+.pill--l { background: rgba(255, 92, 122, 0.12); color: var(--red); }
+.gold-cell { color: var(--gold); font-weight: 700; }
+.card__win { color: var(--green); }
+.card__loss { color: var(--red); }
+
+/* ── Footer (concept `.foot`) ───────────────────────────────── */
+.foot { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 8px; }
+
+/* ── MOTION: die idle float (skipped while rolling) ────────── */
+.die:not(.die--rolling) { animation: die-float 4.5s ease-in-out infinite; }
+@keyframes die-float {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: 0 0 40px var(--die-glow), 0 12px 30px var(--die-shadow), inset 0 0 30px var(--die-inset);
+  }
+  50% {
+    transform: translateY(-5px);
+    box-shadow: 0 0 56px var(--die-glow-strong), 0 16px 34px var(--die-shadow), inset 0 0 34px var(--die-inset-strong);
+  }
+}
+/* Settle "landing" pop + glow flash — declared after die-float so it wins
+   the specificity tie while `.tray--land` is present. */
+.tray--land .die { animation: die-land 0.55s cubic-bezier(0.3, 1.4, 0.5, 1); }
+@keyframes die-land {
+  0%   { transform: scale(1.14); box-shadow: 0 0 70px var(--die-flash), inset 0 0 34px var(--die-flash-inset); }
+  60%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+/* ── MOTION: WIN burst (ring + 10 gold sparks, pure CSS) ───── */
+.win-burst { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.burst-ring {
+  position: absolute; width: 150px; height: 150px; border-radius: 50%;
+  border: 2px solid rgba(46, 230, 168, 0.8);
+  animation: burst-ring 0.8s ease-out forwards;
+}
+@keyframes burst-ring {
+  from { transform: scale(0.35); opacity: 0.9; }
+  to   { transform: scale(1.7);  opacity: 0; }
+}
+.burst-spark {
+  position: absolute; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--gold-soft);
+  box-shadow: 0 0 10px rgba(245, 179, 1, 0.9);
+  animation: burst-spark 0.85s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+@keyframes burst-spark {
+  from { transform: rotate(calc(var(--i, 0) * 36deg)) translateX(16px) scale(1); opacity: 1; }
+  to   { transform: rotate(calc(var(--i, 0) * 36deg)) translateX(92px) scale(0.15); opacity: 0; }
+}
+
+/* ── MOTION: ROLL halo pulse + hover shimmer ───────────────── */
+.roll-btn { position: relative; overflow: hidden; }
+.roll-btn--ready { animation: roll-pulse 2.8s ease-in-out infinite; }
+@keyframes roll-pulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(0, 240, 255, 0.35), 0 0 30px rgba(168, 85, 247, 0.25); }
+  50%      { box-shadow: 0 0 46px rgba(0, 240, 255, 0.55), 0 0 46px rgba(168, 85, 247, 0.40); }
+}
+.roll-btn::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
+  transform: translateX(-130%);
+  transition: transform 0.65s ease;
+  pointer-events: none;
+}
+.roll-btn:hover:not(:disabled)::after { transform: translateX(130%); }
+
+/* ── MOTION: result banner pop-in ──────────────────────────── */
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.9); }
+}
+
+/* ── MOTION: stage-line progress dots (commit/rolling/settle) */
+.stage-dots { display: inline-flex; gap: 4px; margin-right: 10px; vertical-align: middle; }
+.stage-dots i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--neon); box-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
+  animation: dot-blink 1.1s ease-in-out infinite;
+}
+.stage-dots i:nth-child(2) { animation-delay: 0.18s; }
+.stage-dots i:nth-child(3) { animation-delay: 0.36s; }
+@keyframes dot-blink {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 1; }
+}
+
+/* ── MOTION: chart draw-in (TrendChart polyline, pathLength=1) */
+@keyframes trend-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes trend-fade { from { opacity: 0; } }
+
+/* ── MOTION: staggered section entrance on first load ──────── */
+.rise { animation: rise-in 0.55s ease-out both; }
+.rise-1 { animation-delay: 0.04s; }
+.rise-2 { animation-delay: 0.12s; }
+.rise-3 { animation-delay: 0.2s; }
+.rise-4 { animation-delay: 0.28s; }
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+/* ── Accessibility: honor "reduce motion" — every animation
+   collapses to a near-instant single pass (fill states still apply,
+   so charts stay visible and bursts end hidden). ─────────── */
+/* ── LIGHT: chart + hover surfaces ─────────────────────────────── */
+:root[data-theme='light'] .trend__area { fill: rgba(8, 145, 178, 0.12); }
+:root[data-theme='light'] .trend__line { filter: drop-shadow(0 0 6px rgba(8, 145, 178, 0.55)); }
+:root[data-theme='light'] .theme-toggle:hover { background: rgba(15, 23, 42, 0.06); }
+
+/* ── RESPONSIVE PATH (Phase 6) ───────────────────────────────────
+   Desktop ≥1000px is the designed target (2-col game grid). These
+   breakpoints bring the layout down through tablet to 360px phones
+   without any horizontal overflow. */
+@media (max-width: 640px) {
+  .topbar { padding: 12px 14px; }
+  .brand__tag { display: none; } /* wallet chip + theme toggle get the room */
+  .wallet { padding: 7px 10px; font-size: 12px; }
+  .theme-toggle { width: 34px; height: 34px; font-size: 16px; }
+  .table { padding: 24px 14px; }
+  .side { font-size: 14px; padding: 9px 10px; }
+  .target-row { flex-wrap: wrap; }
+  .target-readout { min-width: 100%; flex-direction: row; align-items: baseline; justify-content: space-between; }
+  .roll-btn { font-size: 20px; letter-spacing: 4px; }
+  .result-banner { white-space: normal; text-align: center; border-radius: 18px; }
+  .dash { padding: 16px; }
+  .dash__players { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .dash__table { min-width: 440px; } /* keeps 5 columns legible — scrolls instead of crushing */
+  .fair__card { padding: 14px; }
+}
+@media (max-width: 400px) {
+  .hero-intro h1 { letter-spacing: -0.5px; }
+  .sides { gap: 10px; }
+  .card__value { font-size: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+  }
+}

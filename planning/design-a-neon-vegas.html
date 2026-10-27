@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>kDice — Concept A: Neon Vegas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05070D; --panel:rgba(16,22,40,.72); --panel-border:rgba(0,240,255,.22);
+    --cyan:#00F0FF; --magenta:#A855F7; --gold:#F5B301; --gold-soft:#FFD75E;
+    --text:#E8ECF8; --muted:#8A93B2; --green:#2EE6A8; --red:#FF5C7A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;position:relative}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(600px 400px at 12% -5%,rgba(0,240,255,.14),transparent 60%),radial-gradient(700px 500px at 90% 10%,rgba(168,85,247,.16),transparent 60%),radial-gradient(500px 500px at 50% 110%,rgba(245,179,1,.08),transparent 60%)}
+  .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 28px 80px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 0;margin-bottom:44px;border-bottom:1px solid rgba(0,240,255,.12)}
+  .logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:22px;letter-spacing:.5px}
+  .logo-die{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--cyan),var(--magenta));display:grid;place-items:center;font-size:18px;box-shadow:0 0 18px rgba(0,240,255,.55)}
+  .logo b{background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .theme-pill{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);font-size:13px;color:var(--muted);cursor:pointer}
+  .connect{padding:11px 22px;border-radius:12px;font-weight:600;font-size:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--gold),#FF9D00);color:#1A1204;box-shadow:0 0 22px rgba(245,179,1,.4);font-family:inherit}
+  .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;margin-bottom:56px}
+  .hero h1{font-size:56px;line-height:1.04;font-weight:700;letter-spacing:-1px}
+  .hero h1 span{background:linear-gradient(90deg,var(--cyan) 10%,var(--magenta) 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{margin-top:16px;color:var(--muted);font-size:17px;max-width:420px}
+  .hero-tags{display:flex;gap:10px;margin-top:22px}
+  .tag{padding:7px 14px;border-radius:999px;font-size:12.5px;border:1px solid var(--panel-border);background:rgba(0,240,255,.06);color:var(--cyan)}
+  .tag.gold{border-color:rgba(245,179,1,.35);background:rgba(245,179,1,.07);color:var(--gold-soft)}
+  .dice-stage{display:flex;justify-content:center;gap:26px;padding:30px}
+  .die{width:120px;height:120px;border-radius:22px;position:relative;background:linear-gradient(145deg,#101A33,#0A1020);border:1px solid rgba(0,240,255,.35);box-shadow:0 0 40px rgba(0,240,255,.28), inset 0 0 30px rgba(0,240,255,.10)}
+  .die.m{border-color:rgba(168,85,247,.45);box-shadow:0 0 40px rgba(168,85,247,.30), inset 0 0 30px rgba(168,85,247,.12)}
+  .dot{position:absolute;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--cyan) 70%);box-shadow:0 0 12px rgba(0,240,255,.9)}
+  .die.m .dot{background:radial-gradient(circle at 35% 30%,#fff,var(--magenta) 70%);box-shadow:0 0 12px rgba(168,85,247,.9)}
+  .panel{background:var(--panel);border:1px solid var(--panel-border);border-radius:20px;backdrop-filter:blur(14px);padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05)}
+  .section-title{font-size:13px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:18px}
+  .section-title small{float:right;letter-spacing:0;text-transform:none;color:var(--muted);font-weight:400}
+  .game{display:grid;grid-template-columns:380px 1fr;gap:24px}
+  .mult-row{display:flex;gap:10px;margin-bottom:18px}
+  .mult{flex:1;padding:13px 0;text-align:center;border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:var(--muted)}
+  .mult.on{border-color:var(--cyan);color:var(--cyan);background:rgba(0,240,255,.10);box-shadow:0 0 16px rgba(0,240,255,.25)}
+  .stake{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(245,179,1,.4);border-radius:12px;padding:12px 16px;margin-bottom:18px;background:rgba(245,179,1,.06)}
+  .stake label{font-size:12px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+  .stake .val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)}
+  .roll-btn{width:100%;padding:16px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-size:17px;font-weight:700;letter-spacing:1px;color:#05070D;background:linear-gradient(90deg,var(--cyan),var(--magenta));box-shadow:0 0 30px rgba(0,240,255,.35), 0 0 30px rgba(168,85,247,.25)}
+  .payout{margin-top:14px;text-align:center;font-size:13.5px;color:var(--muted)}
+  .payout b{font-family:'JetBrains Mono',monospace;color:var(--gold);font-size:16px}
+  .roll-result{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+  .result-chip{padding:12px 30px;border-radius:999px;font-weight:700;font-size:19px;background:rgba(46,230,168,.12);border:1px solid rgba(46,230,168,.5);color:var(--green);box-shadow:0 0 24px rgba(46,230,168,.25)}
+  .result-chip b{font-family:'JetBrains Mono',monospace;color:var(--gold)}
+  .prov{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px}
+  .stat .label{font-size:12px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+  .stat .num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700}
+  .stat .num.gold{color:var(--gold)} .stat .num.green{color:var(--green)} .stat .num.red{color:var(--red)}
+  .stat .sub{margin-top:8px;font-size:12.5px;color:var(--muted)}
+  .spark{margin-top:12px}
+  .spark polyline{fill:none;stroke:var(--cyan);stroke-width:2.5;filter:drop-shadow(0 0 6px rgba(0,240,255,.8))}
+  .overall{margin-bottom:28px}
+  .range-tabs{display:flex;gap:8px;margin-bottom:16px}
+  .rtab{padding:7px 16px;border-radius:999px;font-size:13px;color:var(--muted);border:1px solid rgba(255,255,255,.12);cursor:pointer}
+  .rtab.on{color:#05070D;background:var(--cyan);border-color:var(--cyan);font-weight:600}
+  .overall-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:24px}
+  .chart-frame svg{width:100%;height:180px}
+  .chart-frame .line{fill:none;stroke:var(--cyan);stroke-width:3;filter:drop-shadow(0 0 8px rgba(0,240,255,.9))}
+  .chart-frame .area{fill:url(#gA);opacity:.5}
+  .chart-frame .grid{stroke:rgba(255,255,255,.07);stroke-width:1}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;color:var(--muted);font-weight:500;font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.1)}
+  td{padding:10px;border-bottom:1px solid rgba(255,255,255,.06);font-family:'JetBrains Mono',monospace;font-size:13px}
+  td.name{font-family:'Space Grotesk';font-weight:600}
+  .pill{padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:600}
+  .pill.w{background:rgba(46,230,168,.12);color:var(--green)} .pill.l{background:rgba(255,92,122,.12);color:var(--red)}
+  .gold-cell{color:var(--gold);font-weight:700}
+  .foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><div class="logo-die">🎲</div>k<b>Dice</b></div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div class="theme-pill">🌙 Dark &nbsp;|&nbsp; ☀️ Light &nbsp;|&nbsp; 🖥️ System</div>
+      <button class="connect">⚡ Connect K5 Wallet</button>
+    </div>
+  </header>
+  <div class="hero">
+    <div>
+      <h1>ROLL ON.<br><span>WIN IN KLV.</span></h1>
+      <p>Provably fair dice on the Klever Blockchain. Stake, pick your multiplier, and watch the neon roll out.</p>
+      <div class="hero-tags">
+        <div class="tag">⛓ On-chain fairness</div>
+        <div class="tag">📊 Live stats</div>
+        <div class="tag gold">KLV payouts</div>
+      </div>
+    </div>
+    <div class="dice-stage">
+      <div class="die"><div class="dot" style="top:16px;left:16px"></div><div class="dot" style="top:50px;left:50px"></div><div class="dot" style="top:84px;left:84px"></div></div>
+      <div class="die m"><div class="dot" style="top:16px;left:16px"></div><div class="dot" style="top:16px;left:84px"></div><div class="dot" style="top:50px;left:50px"></div><div class="dot" style="top:84px;left:16px"></div><div class="dot" style="top:84px;left:84px"></div></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-bottom:28px">
+    <div class="section-title">Play <small>tx fee ≈ 0.001 KLV · resolved on-chain</small></div>
+    <div class="game">
+      <div>
+        <div class="mult-row"><div class="mult">×2</div><div class="mult">×4</div><div class="mult on">×10</div><div class="mult">×50</div></div>
+        <div class="stake"><label>Stake</label><span class="val">12.50 KLV</span></div>
+        <button class="roll-btn">🎲 ROLL THE DICE</button>
+        <div class="payout">Potential payout <b>+23.75 KLV</b></div>
+      </div>
+      <div class="roll-result">
+        <div class="result-chip">🔥 WIN! <b>+23.75 KLV</b></div>
+        <div class="prov">on-chain ✓&nbsp;&nbsp;tx 0x8f3a…c21e&nbsp;&nbsp;·&nbsp;&nbsp;target ≤ 91.67</div>
+      </div>
+    </div>
+  </div>
+  <div class="stat-grid">
+    <div class="panel stat"><div class="label">KLV Spent</div><div class="num gold">482.60</div><svg class="spark" width="100%" height="34" viewBox="0 0 200 34" preserveAspectRatio="none"><polyline points="0,28 25,24 50,26 75,15 100,19 125,10 150,14 175,6 200,9"/></svg><div class="sub">last 30 days</div></div>
+    <div class="panel stat"><div class="label">Games</div><div class="num">318</div><svg class="spark" width="100%" height="34" viewBox="0 0 200 34" preserveAspectRatio="none"><polyline points="0,20 25,22 50,12 75,16 100,8 125,14 150,6 175,10 200,4"/></svg><div class="sub">+42 this week</div></div>
+    <div class="panel stat"><div class="label">Wins / Losses</div><div class="num"><span class="green">197</span> / <span class="red">121</span></div><div class="sub">62% win rate</div></div>
+    <div class="panel stat"><div class="label">Best Roll</div><div class="num gold">+410.00</div><div class="sub">×50 on 2.15 KLV · 3d ago</div></div>
+  </div>
+  <div class="panel overall">
+    <div class="section-title">Overall Dashboard <small>project-wide stats · event-based analytics</small></div>
+    <div class="range-tabs"><div class="rtab on">7 days</div><div class="rtab">30 days</div><div class="rtab">12 months</div><div class="rtab">All time</div></div>
+    <div class="overall-grid">
+      <div class="chart-frame">
+        <svg viewBox="0 0 600 180" preserveAspectRatio="none">
+          <defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00F0FF" stop-opacity=".35"/><stop offset="1" stop-color="#00F0FF" stop-opacity="0"/></linearGradient></defs>
+          <line class="grid" x1="0" y1="45" x2="600" y2="45"/><line class="grid" x1="0" y1="90" x2="600" y2="90"/><line class="grid" x1="0" y1="135" x2="600" y2="135"/>
+          <path class="area" d="M0,140 L85,120 L170,128 L255,80 L340,95 L425,55 L510,70 L600,35 L600,180 L0,180 Z"/>
+          <polyline class="line" points="0,140 85,120 170,128 255,80 340,95 425,55 510,70 600,35"/>
+        </svg>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:8px;font-family:'JetBrains Mono',monospace"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+      </div>
+      <div>
+        <table>
+          <tr><th>Player</th><th>Games</th><th>W / L</th><th>Staked</th></tr>
+          <tr><td class="name">neonwolf</td><td>214</td><td><span class="pill w">71%</span></td><td class="gold-cell">890.4</td></tr>
+          <tr><td class="name">k5_rider</td><td>162</td><td><span class="pill l">48%</span></td><td class="gold-cell">511.0</td></tr>
+          <tr><td class="name">dicequeen</td><td>133</td><td><span class="pill w">66%</span></td><td class="gold-cell">342.7</td></tr>
+          <tr><td class="name">0xMika</td><td>98</td><td><span class="pill w">59%</span></td><td class="gold-cell">201.3</td></tr>
+          <tr><td class="name">lucky77</td><td>77</td><td><span class="pill l">41%</span></td><td class="gold-cell">129.9</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="foot">Concept A — “Neon Vegas” · dark default, optional light theme (system preselect)</div>
+</div>
+</body>
+</html>

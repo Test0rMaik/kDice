@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>kDice — Concept C: Retro Arcade</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A0E2E; --bg2:#241344; --orange:#FF6B1A; --yellow:#FFD23F; --cyan:#22D3EE;
+    --pink:#FF4D9D; --green:#3BE081; --text:#FFE9F2; --dim:#B48AD6;
+    --sh:6px 6px 0 #0A0514;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;image-rendering:pixelated}
+  body{background:var(--bg);color:var(--text);font-family:'VT323',monospace;font-size:20px;min-height:100vh;position:relative}
+  /* CRT scanlines + vignette */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 2px,transparent 2px 4px)}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:8;
+    background:radial-gradient(120% 100% at 50% 40%,transparent 55%,rgba(0,0,0,.55))}
+  .wrap{max-width:1060px;margin:0 auto;padding:24px 24px 64px;position:relative;z-index:2}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border:4px solid var(--cyan);background:var(--bg2);box-shadow:var(--sh);margin-bottom:26px}
+  .logo{font-family:'Press Start 2P';font-size:18px;color:var(--yellow);text-shadow:3px 3px 0 var(--pink)}
+  .coin{font-family:'Press Start 2P';font-size:9px;color:var(--cyan);animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .wallet{font-family:'Press Start 2P';font-size:9px;background:var(--orange);color:#1A0E2E;padding:12px 14px;border:4px solid #0A0514;box-shadow:4px 4px 0 #0A0514;cursor:pointer}
+  .marquee{display:flex;justify-content:center;gap:14px;margin-bottom:20px;font-family:'Press Start 2P';font-size:10px;color:var(--pink)}
+  .marquee .st{color:var(--yellow)} .marquee .st2{color:var(--green)}
+  .marquee .st3{color:var(--cyan)}
+  .stage{display:flex;justify-content:center;align-items:center;gap:36px;padding:26px 0 34px}
+  .dicebox{position:relative;width:150px;height:150px;background:var(--yellow);border:6px solid #0A0514;box-shadow:var(--sh);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;padding:18px;transform:rotate(-6deg)}
+  .dicebox .pip{width:26px;height:26px;background:#0A0514;justify-self:center;align-self:center;box-shadow:inset 0 0 0 3px rgba(255,255,255,.25)}
+  .dicebox.two{background:var(--pink);transform:rotate(5deg);position:absolute;right:-90px;top:40px;width:90px;height:90px;padding:10px;gap:4px}
+  .dicebox.two .pip{width:14px;height:14px}
+  .scroll{background:#0A0514;border:6px solid var(--orange);box-shadow:var(--sh);width:300px;padding:14px 0 6px}
+  .scroll h3{font-family:'Press Start 2P';font-size:10px;color:var(--orange);text-align:center;padding:0 0 12px;letter-spacing:1px}
+  .scroll .row2{display:flex;justify-content:space-between;padding:0 16px 8px;color:var(--text)}
+  .scroll .row2 b{color:var(--yellow)}
+  .scroll .row2.g b{color:var(--green)} .scroll .row2.r b{color:var(--pink)}
+  .panel{background:var(--bg2);border:6px solid var(--cyan);box-shadow:var(--sh);padding:20px;margin-bottom:22px}
+  .panel.pink{border-color:var(--pink)} .panel.orange{border-color:var(--orange)}
+  .panel h2{font-family:'Press Start 2P';font-size:12px;color:var(--cyan);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+  .panel h2 .hint{font-family:'VT323';font-size:16px;color:var(--dim)}
+  .panel.pink h2{color:var(--pink)} .panel.orange h2{color:var(--orange)}
+  .game{display:grid;grid-template-columns:340px 1fr;gap:22px}
+  .btn{font-family:'Press Start 2P';font-size:11px;padding:14px 16px;border:4px solid #0A0514;cursor:pointer;box-shadow:4px 4px 0 #0A0514;background:var(--green);color:#0A0514;width:100%}
+  .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #0A0514}
+  .sel{display:flex;gap:10px;margin:16px 0}
+  .chip{flex:1;text-align:center;font-family:'Press Start 2P';font-size:10px;padding:12px 0;background:#0A0514;color:var(--dim);border:4px solid #0A0514;cursor:pointer}
+  .chip.on{background:var(--yellow);color:#0A0514;box-shadow:4px 4px 0 #0A0514}
+  .field{background:#0A0514;padding:12px 14px;font-size:22px;display:flex;justify-content:space-between;align-items:center}
+  .field .lb{font-family:'Press Start 2P';font-size:9px;color:var(--cyan)}
+  .field .vl{color:var(--yellow);font-size:24px}
+  .result{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+  .win{font-family:'Press Start 2P';font-size:14px;color:var(--green);text-shadow:3px 3px 0 #0A0514;animation:pop .5s steps(3)}
+  @keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+  .win .amt{color:var(--yellow);font-size:20px;display:block;margin-top:12px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+  .scorebox{background:#0A0514;border:5px solid var(--pink);padding:14px;text-align:center;box-shadow:4px 4px 0 #0A0514}
+  .scorebox .l{font-family:'Press Start 2P';font-size:8px;color:var(--pink);margin-bottom:10px}
+  .scorebox .v{font-family:'VT323';font-size:34px;color:var(--yellow)}
+  .scorebox .v.g{color:var(--green)} .scorebox .v.c{color:var(--cyan)} .scorebox .v.p{color:var(--pink)}
+  .scorebox .s{font-size:16px;color:var(--dim);margin-top:6px}
+  .leader{display:grid;gap:10px}
+  .lrow{display:grid;grid-template-columns:44px 1fr 90px 90px 100px;align-items:center;gap:10px;background:#0A0514;padding:10px 14px;font-size:20px}
+  .lrow .rank{font-family:'Press Start 2P';font-size:11px;color:var(--orange)}
+  .lrow .nm{color:var(--text)} .lrow .c1{color:var(--cyan);text-align:right}
+  .lrow .c2{color:var(--green);text-align:right}
+  .lrow .staked{color:var(--yellow);text-align:right}
+  .lrow.top .rank{color:var(--yellow)} .lrow.top .nm{color:var(--yellow)}
+  .foot{margin-top:18px;text-align:center;font-family:'Press Start 2P';font-size:9px;color:var(--dim)}
+  .foot b{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">K•DICE</div>
+    <div class="coin">INSERT KLV TO PLAY&nbsp;▮</div>
+    <button class="wallet">⬡ LINK K5 WALLET</button>
+  </header>
+  <div class="marquee">
+    <span class="st">★</span><span class="st2">ON-CHAIN DICE</span><span class="st">★</span><span class="st3">PROVABLY FAIR</span><span class="st">★</span><span class="st2">KLEVER L1</span><span class="st">★</span>
+  </div>
+
+  <div class="stage">
+    <div style="position:relative;width:180px;height:220px">
+      <div class="dicebox"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+      <div class="dicebox two"><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
+    </div>
+    <div class="scroll">
+      <h3>◆ GAME LOG ◆</h3>
+      <div class="row2 g"><span>ROLL ×10</span><span><b>WIN +23.75</b></span></div>
+      <div class="row2 r"><span>ROLL ×25</span><span><b>LOSE</b></span></div>
+      <div class="row2 g"><span>ROLL ×4</span><span><b>WIN +8.00</b></span></div>
+      <div class="row2 g"><span>ROLL ×50</span><span><b>WIN +410.00</b></span></div>
+      <div class="row2 r"><span>ROLL ×100</span><span><b>LOSE</b></span></div>
+      <div class="row2 g"><span>ROLL ×2</span><span><b>WIN +1.00</b></span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>▶ 1P GAME <span class="hint">tx fee 0.001 KLV · settled on-chain</span></h2>
+    <div class="game">
+      <div>
+        <div class="field"><span class="lb">STAKE</span><span class="vl">12.50 KLV</span></div>
+        <div class="sel">
+          <div class="chip">×2</div><div class="chip">×4</div><div class="chip on">×10</div><div class="chip">×50</div>
+        </div>
+        <div class="field" style="margin-bottom:16px"><span class="lb">PAYOUT</span><span class="vl">+23.75</span></div>
+        <button class="btn">🎲 ROLL!</button>
+      </div>
+      <div class="result">
+        <div class="win">★ YOU WIN! ★<span class="amt">+23.75 KLV</span></div>
+        <div style="color:var(--dim);font-size:17px;text-align:center">ran 91.42 ≤ target 91.67<br>tx 0x8f3a…c21e · block #18,204,113 ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="scorebox"><div class="l">KLV SPENT</div><div class="v">482.60</div><div class="s">30 DAYS</div></div>
+    <div class="scorebox"><div class="l">GAMES</div><div class="v c">318</div><div class="s">+42 WK</div></div>
+    <div class="scorebox"><div class="l">WIN / LOSE</div><div class="v g">197/121</div><div class="s">62% RATE</div></div>
+    <div class="scorebox"><div class="l">TOP SCORE</div><div class="v p">+410.00</div><div class="s">×50 ROLL</div></div>
+  </div>
+
+  <div class="panel orange">
+    <h2>◆ PROJECT SCORES <span class="hint">overall stats · event log</span></h2>
+    <div style="display:flex;gap:12px;margin-bottom:16px">
+      <div class="chip on" style="flex:0 0 auto;padding:10px 18px">7 DAYS</div><div class="chip" style="flex:0 0 auto;padding:10px 18px">30 DAYS</div>
+      <div class="chip" style="flex:0 0 auto;padding:10px 18px">12 MONTHS</div><div class="chip" style="flex:0 0 auto;padding:10px 18px">ALL</div>
+    </div>
+    <div class="leader">
+      <div class="lrow top"><div class="rank">1.</div><div class="nm">NEONWOLF</div><div class="c1">214 GMS</div><div class="c2">71% WIN</div><div class="staked">890.4 KLV</div></div>
+      <div class="lrow"><div class="rank">2.</div><div class="nm">K5_RIDER</div><div class="c1">162 GMS</div><div class="c2" style="color:var(--pink)">48% WIN</div><div class="staked">511.0 KLV</div></div>
+      <div class="lrow"><div class="rank">3.</div><div class="nm">DICEQUEEN</div><div class="c1">133 GMS</div><div class="c2">66% WIN</div><div class="staked">342.7 KLV</div></div>
+      <div class="lrow"><div class="rank">4.</div><div class="nm">0XMKA</div><div class="c1">98 GMS</div><div class="c2">59% WIN</div><div class="staked">201.3 KLV</div></div>
+      <div class="lrow"><div class="rank">5.</div><div class="nm">LUCKY77</div><div class="c1">77 GMS</div><div class="c2" style="color:var(--pink)">41% WIN</div><div class="staked">129.9 KLV</div></div>
+    </div>
+  </div>
+
+  <div class="foot">CONCEPT C — <b>RETRO ARCADE</b> · PRESS START 2P / VT323 · CRT SCANLINES</div>
+</div>
+</body>
+</html>

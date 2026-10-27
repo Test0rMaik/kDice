@@ -1,0 +1,433 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.93.1",
+            "commitHash": "01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf",
+            "commitDate": "2026-02-11",
+            "channel": "Stable",
+            "short": "rustc 1.93.1 (01f6ddf75 2026-02-11)"
+        },
+        "contractCrate": {
+            "name": "kdice-contract",
+            "version": "1.0.0"
+        },
+        "framework": {
+            "name": "klever-sc",
+            "version": "0.45.0"
+        }
+    },
+    "docs": [
+        "Contract assembly.",
+        "",
+        "`#[klever_sc::contract]` aggregates every `#[klever_sc::module]` listed in",
+        "the super-traits into a single deployable contract object. Per the 0.45.0",
+        "pattern, `#[init]` (runs once on first deploy) and `#[upgrade]` (runs on",
+        "every redeploy) are declared in this trait body."
+    ],
+    "name": "KDiceContract",
+    "constructor": {
+        "docs": [
+            "Runs once on first deploy: grant ownership to the deployer and seed the",
+            "protocol metadata with sensible defaults."
+        ],
+        "inputs": [],
+        "outputs": []
+    },
+    "upgradeConstructor": {
+        "docs": [
+            "Runs on every redeploy: the schema is forward-compatible, so existing",
+            "commits / rolls / counters are preserved untouched."
+        ],
+        "inputs": [],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "docs": [
+                "Record a new pending commit. Caller is the player.",
+                "",
+                "Returns the newly assigned commit ID."
+            ],
+            "name": "commit",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                },
+                {
+                    "name": "multiplier",
+                    "type": "u32"
+                },
+                {
+                    "name": "stake",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Reveal both seeds and settle the commit."
+            ],
+            "name": "settle",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "game_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "server_seed",
+                    "type": "bytes"
+                },
+                {
+                    "name": "player_seed",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "docs": [
+                "Admin: change the human-readable contract name."
+            ],
+            "name": "setName",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "name",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "docs": [
+                "Admin: change the per-player cap on simultaneously active commits."
+            ],
+            "name": "setMaxActiveCommits",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "max",
+                    "type": "u16"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "docs": [
+                "Admin: hand ownership to a new address."
+            ],
+            "name": "transferOwner",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_owner",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "docs": [
+                "Human-readable contract name (admin-settable)."
+            ],
+            "name": "getName",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Current protocol version marker."
+            ],
+            "name": "getProtocolVersion",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Total number of commits ever recorded."
+            ],
+            "name": "getCommitsCount",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Total number of settlements ever recorded."
+            ],
+            "name": "getRollsCount",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Hard cap on simultaneously active commits per player."
+            ],
+            "name": "getMaxActiveCommits",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u16"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "The pending/active commit for a given game ID (reverts if absent)."
+            ],
+            "name": "getCommit",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "game_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "CommitRecord"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "The immutable settlement record for a given game ID (reverts if absent)."
+            ],
+            "name": "getRoll",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "game_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "RollRecord"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Number of currently unsettled commits for a player."
+            ],
+            "name": "getActiveCommits",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "player",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u16"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Highest roll that still wins for the given multiplier.",
+                "Reverts if the multiplier is not in the fixed set."
+            ],
+            "name": "getTarget",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "multiplier",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "docs": [
+                "A new pending commit was recorded.",
+                "",
+                "`multiplier` is indexed so the event carries a single data argument",
+                "(`stake`), as required by the `klever-sc-derive` 0.45.0 event ABI."
+            ],
+            "identifier": "commit",
+            "inputs": [
+                {
+                    "name": "game_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "player",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "multiplier",
+                    "type": "u32",
+                    "indexed": true
+                },
+                {
+                    "name": "stake",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "A commit was settled; the deterministic roll and outcome are emitted.",
+                "",
+                "`roll` is indexed so the event carries a single data argument (`win`)."
+            ],
+            "identifier": "settle",
+            "inputs": [
+                {
+                    "name": "game_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "player",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "roll",
+                    "type": "u32",
+                    "indexed": true
+                },
+                {
+                    "name": "win",
+                    "type": "bool"
+                }
+            ]
+        }
+    ],
+    "kdaAttributes": [],
+    "types": {
+        "CommitRecord": {
+            "type": "struct",
+            "docs": [
+                "Active commit: a stake that has been committed but not yet settled."
+            ],
+            "fields": [
+                {
+                    "docs": [
+                        "The player who created this commit (caller of `commit`)."
+                    ],
+                    "name": "player",
+                    "type": "Address"
+                },
+                {
+                    "docs": [
+                        "Multiplier at commit time — the winning threshold derives from it."
+                    ],
+                    "name": "multiplier",
+                    "type": "u32"
+                },
+                {
+                    "docs": [
+                        "Stake in smallest KLV units (0 = \"free\" record commit)."
+                    ],
+                    "name": "stake",
+                    "type": "BigUint"
+                },
+                {
+                    "docs": [
+                        "32-byte SHA256(server_seed || player_seed) the player is bound to."
+                    ],
+                    "name": "hash",
+                    "type": "bytes"
+                },
+                {
+                    "docs": [
+                        "Block timestamp of the commit."
+                    ],
+                    "name": "created_at",
+                    "type": "u64"
+                },
+                {
+                    "docs": [
+                        "Whether this commit is still pending settlement."
+                    ],
+                    "name": "active",
+                    "type": "bool"
+                }
+            ]
+        },
+        "RollRecord": {
+            "type": "struct",
+            "docs": [
+                "Settlement record: the immutable, verifiable outcome of one game."
+            ],
+            "fields": [
+                {
+                    "docs": [
+                        "Roll result in the inclusive range `[1, 100]`."
+                    ],
+                    "name": "roll",
+                    "type": "u32"
+                },
+                {
+                    "docs": [
+                        "Whether the roll beat the target derived from `multiplier`."
+                    ],
+                    "name": "win",
+                    "type": "bool"
+                },
+                {
+                    "docs": [
+                        "Multiplier the game was committed with."
+                    ],
+                    "name": "multiplier",
+                    "type": "u32"
+                },
+                {
+                    "docs": [
+                        "Stake in smallest KLV units (echoed from the commit record)."
+                    ],
+                    "name": "stake",
+                    "type": "BigUint"
+                },
+                {
+                    "docs": [
+                        "Block timestamp of the settlement."
+                    ],
+                    "name": "settled_at",
+                    "type": "u64"
+                }
+            ]
+        }
+    }
+}

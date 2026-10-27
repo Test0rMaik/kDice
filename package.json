@@ -1,0 +1,29 @@
+{
+  "name": "kdice-scaffold",
+  "private": true,
+  "version": "0.4.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "parity": "esbuild scripts/fair-parity.ts --bundle --format=esm --platform=node --outfile=node_modules/.cache/kdice-fair-parity.mjs && node node_modules/.cache/kdice-fair-parity.mjs",
+    "test": "esbuild scripts/eventlog-tests.ts --bundle --format=esm --platform=node --outfile=node_modules/.cache/kdice-eventlog-tests.mjs && node node_modules/.cache/kdice-eventlog-tests.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "dexie": "4.4.7",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "esbuild": "^0.28.2",
+    "oxlint": "^1.88.0",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.4"
+  }
+}

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- CSP (Phase 6 security pass):
+         • script-src 'self'   — only bundled app code (no eval, no inline scripts;
+                                theme-init.js is a static file from /public)
+         • style-src 'unsafe-inline' — required for React `style=""` attributes
+                                (inline <style> blocks are NOT used by the build)
+         • connect-src https:  — the K5 node URL is USER-CONFIGURABLE (self-hosted
+                                devnet/testnet nodes are a supported workflow), so
+                                arbitrary https endpoints are allowed by design
+         • object-src 'none' / base-uri 'self' / form-action 'none' — harden against
+                                plugin/base-hijack/form-posting injection vectors -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'none'"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Pre-paint theme bootstrap (localStorage choice → OS preference; no flash) -->
+    <script src="/theme-init.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <title>kDice</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+[package]
+name = "kdice-contract-meta"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies.kdice-contract]
+path = ".."
+
+[dependencies.klever-sc-meta]
+version = "0.45.0"
+default-features = false
+

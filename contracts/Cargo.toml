@@ -1,0 +1,23 @@
+[package]
+name = "kdice-contract"
+version = "3.0.0"
+edition = "2021"
+authors = ["kDice"]
+license = "MIT"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies.klever-sc]
+version = "=0.45.0"
+
+[dependencies.sha2]
+version = "0.10"
+default-features = false
+
+[dev-dependencies.klever-sc-scenario]
+version = "=0.45.0"
+
+[workspace]
+members = [".", "meta"]
